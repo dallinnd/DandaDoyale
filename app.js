@@ -94,18 +94,14 @@ function renderGame() {
                     ${diceConfig.map(dice => renderDiceRow(dice, roundData)).join('')}
                     
                     <div id="wild-section" class="mt-8 border-t border-[var(--border-ui)] pt-6">
-                        <div class="wild-stack">
-                            ${(roundData.wild || []).map((w, idx) => `
-                                <div onclick="setActiveWildInput(${idx})" id="wild-card-${idx}" class="wild-card ${activeInputField === 'wild-'+idx ? 'active-input' : ''}" style="border-left: 8px solid ${diceConfig.find(d=>d.id===w.target).color}">
-                                    <div class="flex justify-between items-start">
-                                        <span class="text-[10px] font-black uppercase opacity-40">Wild Dice #${idx+1}</span>
-                                        <span class="text-3xl font-black wild-val-display">${w.value || 0}</span>
-                                    </div>
-                                    <div class="color-picker-wheel">
-                                        ${diceConfig.filter(d => d.id !== 'yellow').map(d => `<div onclick="event.stopPropagation(); setWildTarget(${idx}, '${d.id}')" class="wheel-item ${w.target === d.id ? 'selected' : ''}" style="background-color: ${d.color}"></div>`).join('')}
-                                    </div>
-                                </div>`).join('')}
+                        <div class="wild-stack" id="wild-list-container">
+                            ${(roundData.wild || []).map((w, idx) => renderWildCardHtml(w, idx)).join('')}
                         </div>
+                        <div class="flex gap-2">
+                            <button onclick="addWildDie()" ...>Add Wild +</button>
+                            <button onclick="removeWildDie()" ...>Remove -</button>
+                        </div>
+                    </div>
                         <div class="flex gap-2">
                             <button onclick="addWildDie()" class="flex-1 bg-green-600 text-white p-4 rounded-2xl font-black uppercase text-xs">Add Wild +</button>
                             <button onclick="removeWildDie()" class="flex-1 bg-red-600 text-white p-4 rounded-2xl font-black uppercase text-xs">Remove -</button>
