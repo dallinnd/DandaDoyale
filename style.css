@@ -5,7 +5,6 @@
     --text-primary: #f1f5f9;
     --text-secondary: #94a3b8;
     --border-ui: #1e293b;
-    --color-score: #16a34a;
 }
 
 body.light-theme {
@@ -15,7 +14,6 @@ body.light-theme {
     --text-primary: #111827;
     --text-secondary: #4b5563;
     --border-ui: #d1d5db;
-    --color-score: #15803d;
 }
 
 body {
@@ -26,49 +24,41 @@ body {
     margin: 0;
 }
 
-.animate-fadeIn { animation: fadeIn 0.2s ease-out forwards; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-/* Layout Splits */
+/* Scroll Lock Splits */
 .scroll-area { height: 65%; overflow-y: auto; -webkit-overflow-scrolling: touch; }
 .keypad-area { height: 35%; position: relative; z-index: 50; background-color: var(--bg-keypad); border-top: 1px solid var(--border-ui); }
 
 .dice-row { background-color: var(--bg-card); transition: all 0.2s ease; border-left-width: 8px; }
 
-/* Memory UI */
+/* Top Setup UI */
+.wild-counter-top {
+    background-color: white; color: #000;
+    border-radius: 20px; padding: 16px; margin-bottom: 20px;
+    display: flex; justify-content: space-between; align-items: center;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.counter-btn {
+    width: 44px; height: 44px; background-color: #f3f4f6;
+    border-radius: 12px; display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem; font-weight: 900;
+}
+
 .prev-round-box {
-    background-color: #fbbf24;
-    color: #000;
-    border-radius: 16px;
-    padding: 12px 16px;
-    font-weight: 900;
-    font-size: 0.75rem;
-    margin-bottom: 12px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    background-color: #fbbf24; color: #000;
+    border-radius: 16px; padding: 12px 16px; font-weight: 900;
+    font-size: 0.75rem; margin-bottom: 12px;
+    display: flex; justify-content: space-between; align-items: center;
 }
 
-/* Wild Dice Stack */
-.wild-stack { display: flex; flex-direction: column; gap: 12px; margin-bottom: 12px; }
+/* Wild Assignment Cards */
+.wild-stack { display: flex; flex-direction: column; gap: 12px; margin-top: 12px; }
 .wild-card {
-    background-color: white;
-    color: #000;
-    border-radius: 20px;
-    padding: 16px;
-    border: 3px solid transparent;
-    transition: all 0.2s ease;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+    background-color: white; color: #000;
+    border-radius: 20px; padding: 16px; border: 3px solid transparent;
+    transition: all 0.2s ease; display: flex; flex-direction: column; gap: 12px;
 }
-
-/* Selected Wild Card Style */
-.wild-card.active-input {
-    background-color: #000 !important;
-    color: #fff !important;
-    border-color: #16a34a;
-}
+.wild-card.active-input { background-color: #000 !important; color: #fff !important; border-color: #16a34a; }
 
 .color-picker-wheel { display: flex; justify-content: center; gap: 8px; padding-top: 10px; border-top: 1px solid rgba(0,0,0,0.05); }
 .wheel-item { flex: 0 0 auto; width: 26px; height: 26px; border-radius: 50%; border: 2px solid #ddd; }
