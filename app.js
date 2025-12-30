@@ -224,8 +224,53 @@ function calculateRoundTotal(round) {
 }
 
 // Handlers
-function addWildDie() { const rd = activeGame.rounds[activeGame.currentRound]; if (!rd.wild) rd.wild = []; if (rd.wild.length < 9) { rd.wild.push({ value: 0, target: 'purple' }); renderGame(); saveGame(); } }
-function removeWildDie() { const rd = activeGame.rounds[activeGame.currentRound]; if (rd.wild && rd.wild.length > 0) { rd.wild.pop(); activeInputField = null; renderGame(); saveGame(); } }
+function addWildDie() {
+    const rd = activeGame.rounds[activeGame.currentRound];
+    if (!rd.wild) rd.wild = [];
+    
+    if (rd.wild.length < 9) {
+        const newIdx = rd.wild.length;
+        const newWild = { value: 0, target: 'purple' };
+        rd.wild.push(newWild);
+
+        // 1. Create the new element string
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = renderWildCardHtml(newWild, newIdx);
+        const newNode = tempDiv.firstElementChild;
+
+        // 2. Append directly to the container (Preserves Scroll)
+        const container = document.getElementById('wild-list-container');
+        if (container) {
+            container.appendChild(newNode);
+        }
+        
+        saveGame();
+        updateAllDisplays();
+    }
+}
+
+function removeWildDie() {
+    const rd = activeGame.rounds[activeGame.currentRound];
+    if (rd.wild && rd.wild.length > 0) {
+        const lastIdx = rd.wild.length - 1;
+        rd.wild.pop();
+
+        // 1. Remove the last element directly (Preserves Scroll)
+        const elementToRemove = document.getElementById(`wild-card-${lastIdx}`);
+        if (elementToRemove) {
+            elementToRemove.remove();
+        }
+
+        // 2. Handle focus if the deleted card was active
+        if (activeInputField === `wild-${lastIdx}`) {
+            activeInputField = null;
+            updateKpDisplay();
+        }
+
+        saveGame();
+        updateAllDisplays();
+    }
+}
 function kpInput(v) { keypadValue += v; updateKpDisplay(); }
 function kpClear() { keypadValue = ''; updateKpDisplay(); }
 function kpToggleNeg() { keypadValue = keypadValue.startsWith('-') ? keypadValue.substring(1) : (keypadValue ? '-' + keypadValue : '-'); updateKpDisplay(); }
