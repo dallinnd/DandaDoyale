@@ -21,13 +21,13 @@ function applySettings() {
     localStorage.setItem('panda_settings', JSON.stringify(settings));
 }
 
-// --- Navigation & Popups ---
+// --- Navigation ---
 
 function showSplash() {
     app.innerHTML = `<div class="h-full flex flex-col items-center justify-center bg-[#0f172a]" onclick="showHome()">
         <h1 class="text-6xl font-black text-green-400">PANDA</h1>
         <h2 class="text-2xl font-bold text-slate-500 tracking-[0.3em] uppercase">Royale</h2>
-        <p class="mt-12 text-slate-600 animate-pulse font-bold text-xs uppercase">Tap to Enter</p>
+        <p class="mt-12 text-slate-600 animate-pulse font-bold text-xs">TAP TO ENTER</p>
     </div>`;
 }
 
@@ -38,7 +38,7 @@ function showHome() {
                 <div class="text-[10px] font-black opacity-40 uppercase">Game #${games.length - i}</div>
                 <div class="text-xl font-bold">${g.date}</div>
             </div>
-            <div class="text-3xl font-black" style="color: var(--color-score)">${calculateGrandTotal(g)}</div>
+            <div class="text-3xl font-black text-green-500">${calculateGrandTotal(g)}</div>
         </div>`).join('');
 
     app.innerHTML = `
@@ -47,7 +47,7 @@ function showHome() {
                 <h1 class="text-4xl font-black tracking-tighter">History</h1>
                 <button onclick="toggleMenu()" class="p-2 bg-black/5 rounded-xl"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2.5" stroke-linecap="round" d="M4 6h16M4 12h16m-7 6h7"></path></svg></button>
             </div>
-            <div class="flex-1 overflow-y-auto">${list || '<p class="opacity-30 italic text-center py-20">No games found.</p>'}</div>
+            <div class="flex-1 overflow-y-auto">${list || '<p class="opacity-30 italic text-center py-20">No history found.</p>'}</div>
             <button onclick="startNewGame()" class="w-full bg-green-600 py-5 rounded-3xl font-black text-xl text-white mt-6 shadow-xl">NEW GAME</button>
         </div>`;
 }
@@ -64,7 +64,7 @@ function openGameActions(index) {
     document.body.appendChild(overlay);
 }
 
-// --- Gameplay Render ---
+// --- Round Renders ---
 
 function renderGame() {
     const roundNum = activeGame.currentRound + 1;
@@ -94,12 +94,12 @@ function renderGame() {
                     ${diceConfig.map(dice => renderDiceRow(dice, roundData)).join('')}
                     
                     <div id="wild-section" class="mt-8 border-t border-[var(--border-ui)] pt-6">
-                        <div class="wild-grid">
+                        <div class="wild-stack">
                             ${(roundData.wild || []).map((w, idx) => `
-                                <div onclick="setActiveWildInput(${idx})" class="wild-card ${activeInputField === 'wild-'+idx ? 'active-input' : ''}" style="border-left: 8px solid ${diceConfig.find(d=>d.id===w.target).color}">
+                                <div onclick="setActiveWildInput(${idx})" id="wild-card-${idx}" class="wild-card ${activeInputField === 'wild-'+idx ? 'active-input' : ''}" style="border-left: 8px solid ${diceConfig.find(d=>d.id===w.target).color}">
                                     <div class="flex justify-between items-start">
-                                        <span class="text-[10px] font-black uppercase opacity-40">Wild #${idx+1}</span>
-                                        <span class="text-2xl font-black wild-val-display">${w.value || 0}</span>
+                                        <span class="text-[10px] font-black uppercase opacity-40">Wild Dice #${idx+1}</span>
+                                        <span class="text-3xl font-black wild-val-display">${w.value || 0}</span>
                                     </div>
                                     <div class="color-picker-wheel">
                                         ${diceConfig.filter(d => d.id !== 'yellow').map(d => `<div onclick="event.stopPropagation(); setWildTarget(${idx}, '${d.id}')" class="wheel-item ${w.target === d.id ? 'selected' : ''}" style="background-color: ${d.color}"></div>`).join('')}
@@ -112,14 +112,11 @@ function renderGame() {
                         </div>
                     </div>
                 </div>
-                <div class="grand-total-footer animate-fadeIn">
-                    <span class="text-[10px] font-black uppercase opacity-50 block mb-1">Grand Total</span>
-                    <span id="grand-total-box" class="text-5xl font-black">0</span>
-                </div>
+                <div class="grand-total-footer"><span class="text-[10px] font-black uppercase opacity-50 block mb-1">Grand Total</span><span id="grand-total-box" class="text-5xl font-black">0</span></div>
             </div>
         </div>
 
-        <div id="keypad-container" class="keypad-area p-4 shadow-2xl flex flex-col">
+        <div id="keypad-container" class="keypad-area p-4 flex flex-col">
             <div id="active-input-display" class="text-center text-lg font-black mb-3 h-6 tracking-widest uppercase opacity-60">-</div>
             <div class="grid grid-cols-4 gap-2 flex-1">
                 ${[1,2,3].map(n => `<button onclick="kpInput('${n}')" class="kp-btn bg-black/5 text-inherit text-3xl">${n}</button>`).join('')}
@@ -143,19 +140,19 @@ function renderDiceRow(dice, roundData) {
     </div>`;
 }
 
-// --- Core Engine Logic ---
+// --- Logic & Partial DOM Updates ---
 
 function toggleSparkle() {
-    const roundData = activeGame.rounds[activeGame.currentRound];
-    roundData.blueHasSparkle = !roundData.blueHasSparkle;
+    const rd = activeGame.rounds[activeGame.currentRound];
+    rd.blueHasSparkle = !rd.blueHasSparkle;
     const btn = document.getElementById('sparkle-btn');
-    if (btn) { btn.innerHTML = roundData.blueHasSparkle ? 'Sparkle Activated ✨' : 'Add Sparkle?'; btn.className = `sparkle-btn-full ${roundData.blueHasSparkle ? 'sparkle-on' : 'sparkle-off'}`; }
+    if (btn) { btn.innerHTML = rd.blueHasSparkle ? 'Sparkle Activated ✨' : 'Add Sparkle?'; btn.className = `sparkle-btn-full ${rd.blueHasSparkle ? 'sparkle-on' : 'sparkle-off'}`; }
     updateAllDisplays(); saveGame();
 }
 
 function setWildTarget(idx, targetId) {
     activeGame.rounds[activeGame.currentRound].wild[idx].target = targetId;
-    const card = document.querySelectorAll('.wild-card')[idx];
+    const card = document.getElementById(`wild-card-${idx}`);
     if (card) {
         card.style.borderLeftColor = diceConfig.find(d => d.id === targetId).color;
         const items = card.querySelectorAll('.wheel-item');
@@ -167,20 +164,10 @@ function setWildTarget(idx, targetId) {
 function setActiveWildInput(idx) {
     activeInputField = `wild-${idx}`;
     document.querySelectorAll('.wild-card').forEach((c, i) => c.classList.toggle('active-input', i === idx));
+    document.querySelectorAll('.dice-row').forEach(r => { r.style.backgroundColor = ""; r.style.color = ""; });
     document.querySelectorAll('.kp-btn').forEach(b => { b.style.backgroundColor = "#fff"; b.style.color = "#000"; });
     const addBtn = document.getElementById('add-btn'); if (addBtn) { addBtn.style.backgroundColor = '#16a34a'; addBtn.style.color = '#fff'; }
     updateKpDisplay();
-}
-
-function addWildDie() {
-    const rd = activeGame.rounds[activeGame.currentRound];
-    if (!rd.wild) rd.wild = [];
-    if (rd.wild.length < 9) { rd.wild.push({ value: 0, target: 'purple' }); renderGame(); saveGame(); }
-}
-
-function removeWildDie() {
-    const rd = activeGame.rounds[activeGame.currentRound];
-    if (rd.wild && rd.wild.length > 0) { rd.wild.pop(); activeInputField = null; renderGame(); saveGame(); }
 }
 
 function setActiveInput(id) {
@@ -236,7 +223,9 @@ function calculateRoundTotal(round) {
     return total;
 }
 
-// Standard Handlers
+// Handlers
+function addWildDie() { const rd = activeGame.rounds[activeGame.currentRound]; if (!rd.wild) rd.wild = []; if (rd.wild.length < 9) { rd.wild.push({ value: 0, target: 'purple' }); renderGame(); saveGame(); } }
+function removeWildDie() { const rd = activeGame.rounds[activeGame.currentRound]; if (rd.wild && rd.wild.length > 0) { rd.wild.pop(); activeInputField = null; renderGame(); saveGame(); } }
 function kpInput(v) { keypadValue += v; updateKpDisplay(); }
 function kpClear() { keypadValue = ''; updateKpDisplay(); }
 function kpToggleNeg() { keypadValue = keypadValue.startsWith('-') ? keypadValue.substring(1) : (keypadValue ? '-' + keypadValue : '-'); updateKpDisplay(); }
@@ -255,9 +244,9 @@ function saveGame() { localStorage.setItem('panda_games', JSON.stringify(games))
 function calculateGrandTotal(g) { return g.rounds.reduce((t, r) => t + calculateRoundTotal(r), 0); }
 function resumeGame(i) { activeGame = games[i]; if(document.getElementById('action-modal')) document.getElementById('action-modal').remove(); renderGame(); }
 function confirmDelete(i) { if(confirm("Delete game?")) { games.splice(i, 1); saveGame(); if(document.getElementById('action-modal')) document.getElementById('action-modal').remove(); showHome(); } }
-function startNewGame() { activeGame = { id: Date.now(), date: new Date().toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }), currentRound: 0, rounds: Array(10).fill(null).map(() => ({ yellow: [], purple: [], blue: [], red: [], green: [], clear: [], pink: [], wild: [], blueHasSparkle: false })) }; games.unshift(activeGame); saveGame(); renderGame(); }
+function startNewGame() { activeGame = { id: Date.now(), date: new Date().toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }), currentRound: 0, rounds: Array(10).fill(null).map(() => ({ yellow: [], purple: [], blue: [], red: [], green: [], clear: [], pink: [], blueHasSparkle: false })) }; games.unshift(activeGame); saveGame(); renderGame(); }
 function toggleMenu() { const existing = document.getElementById('menu-overlay'); if (existing) { existing.remove(); return; } const menu = document.createElement('div'); menu.id = 'menu-overlay'; menu.className = 'modal-overlay justify-end animate-fadeIn'; menu.onclick = (e) => { if(e.target === menu) toggleMenu(); }; menu.innerHTML = `<div class="menu-panel flex flex-col"><h2 class="text-xl font-black uppercase mb-10">Settings</h2><button onclick="setTheme('dark')" class="w-full text-left p-4 rounded-2xl border-2 mb-3 ${settings.theme === 'dark' ? 'border-green-600 bg-green-600/10' : 'border-black/5'}">Dark Navy</button><button onclick="setTheme('light')" class="w-full text-left p-4 rounded-2xl border-2 ${settings.theme === 'light' ? 'border-blue-600 bg-blue-600/10' : 'border-black/5'}">Off-White</button><button onclick="clearHistory()" class="mt-auto text-red-600 font-bold p-4 opacity-50 italic">Clear All</button></div>`; document.body.appendChild(menu); }
-function clearHistory() { if(confirm("Clear all?")) { games = []; saveGame(); toggleMenu(); showHome(); } }
+function clearHistory() { if(confirm("Clear?")) { games = []; saveGame(); toggleMenu(); showHome(); } }
 
 applySettings();
 showSplash();
