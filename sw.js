@@ -1,4 +1,4 @@
-const CACHE_NAME = 'panda-royale-v1';
+const CACHE_NAME = 'panda-royale-expansion-v2';
 const ASSETS = [
   './',
   './index.html',
