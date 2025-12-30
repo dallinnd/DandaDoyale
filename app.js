@@ -70,6 +70,7 @@ function renderGame() {
     const roundNum = activeGame.currentRound + 1;
     const roundData = activeGame.rounds[activeGame.currentRound];
 
+    // Previous Round Yellow logic
     let prevYellowHtml = '';
     if (activeGame.currentRound > 0) {
         const prevSum = (activeGame.rounds[activeGame.currentRound - 1].yellow || []).reduce((a, b) => a + b, 0);
@@ -77,12 +78,15 @@ function renderGame() {
     }
 
     app.innerHTML = `
-        <div class="scroll-area">
+        <div class="scroll-area" id="game-scroll-container">
             <div class="sticky top-0 bg-inherit backdrop-blur-md z-50 p-5 border-b border-[var(--border-ui)] flex justify-between items-center">
                 <button onclick="showHome()" class="text-[10px] font-black uppercase opacity-50 px-3 py-2 rounded-lg bg-black/5">Exit</button>
                 <div class="flex items-center gap-6">
                     <button onclick="changeRound(-1)" class="text-4xl font-bold ${roundNum === 1 ? 'opacity-0 pointer-events-none' : 'text-blue-500'}">←</button>
-                    <div class="text-center"><div class="text-xl font-black uppercase">Round ${roundNum}</div><div id="round-total-display" class="text-5xl font-black">0</div></div>
+                    <div class="text-center">
+                        <div class="text-xl font-black uppercase">Round ${roundNum}</div>
+                        <div id="round-total-display" class="text-5xl font-black">0</div>
+                    </div>
                     <button onclick="changeRound(1)" class="text-4xl font-bold ${roundNum === 10 ? 'opacity-0 pointer-events-none' : 'text-blue-500'}">→</button>
                 </div>
                 <div class="w-10"></div>
@@ -90,25 +94,31 @@ function renderGame() {
             
             <div class="p-4 pb-8">
                 ${prevYellowHtml}
+
+                <div class="wild-counter-top animate-fadeIn">
+                    <span class="text-[10px] font-black uppercase opacity-40">Wild Dice Available</span>
+                    <div class="flex items-center gap-6">
+                        <button onclick="adjustWildCount(-1)" class="counter-btn">-</button>
+                        <span id="wild-count-num" class="text-3xl font-black">${(roundData.wild || []).length}</span>
+                        <button onclick="adjustWildCount(1)" class="counter-btn">+</button>
+                    </div>
+                </div>
+
                 <div class="space-y-3">
                     ${diceConfig.map(dice => renderDiceRow(dice, roundData)).join('')}
                     
-                    <div id="wild-section" class="mt-8 border-t border-[var(--border-ui)] pt-6">
+                    <div id="wild-section-header" class="mt-8 border-t border-[var(--border-ui)] pt-6 ${(roundData.wild || []).length === 0 ? 'hidden' : ''}">
+                        <div class="text-[10px] font-black uppercase opacity-40 mb-3 ml-2">Wild Dice Assignments</div>
                         <div class="wild-stack" id="wild-list-container">
                             ${(roundData.wild || []).map((w, idx) => renderWildCardHtml(w, idx)).join('')}
                         </div>
-                        <div class="flex gap-2">
-                            <button onclick="addWildDie()" ...>Add Wild +</button>
-                            <button onclick="removeWildDie()" ...>Remove -</button>
-                        </div>
-                    </div>
-                        <div class="flex gap-2">
-                            <button onclick="addWildDie()" class="flex-1 bg-green-600 text-white p-4 rounded-2xl font-black uppercase text-xs">Add Wild +</button>
-                            <button onclick="removeWildDie()" class="flex-1 bg-red-600 text-white p-4 rounded-2xl font-black uppercase text-xs">Remove -</button>
-                        </div>
                     </div>
                 </div>
-                <div class="grand-total-footer"><span class="text-[10px] font-black uppercase opacity-50 block mb-1">Grand Total</span><span id="grand-total-box" class="text-5xl font-black">0</span></div>
+
+                <div class="grand-total-footer">
+                    <span class="text-[10px] font-black uppercase opacity-50 block mb-1">Grand Total</span>
+                    <span id="grand-total-box" class="text-5xl font-black">0</span>
+                </div>
             </div>
         </div>
 
@@ -125,6 +135,39 @@ function renderGame() {
             </div>
         </div>`;
     updateAllDisplays();
+}
+
+function adjustWildCount(delta) {
+    const rd = activeGame.rounds[activeGame.currentRound];
+    if (!rd.wild) rd.wild = [];
+    
+    const newCount = rd.wild.length + delta;
+    if (newCount < 0 || newCount > 9) return;
+
+    if (delta > 0) {
+        // Add Die
+        const newIdx = rd.wild.length;
+        const newWild = { value: 0, target: 'purple' };
+        rd.wild.push(newWild);
+        const container = document.getElementById('wild-list-container');
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = renderWildCardHtml(newWild, newIdx);
+        container.appendChild(tempDiv.firstElementChild);
+    } else {
+        // Remove Die
+        const lastIdx = rd.wild.length - 1;
+        rd.wild.pop();
+        const el = document.getElementById(`wild-card-${lastIdx}`);
+        if (el) el.remove();
+        if (activeInputField === `wild-${lastIdx}`) activeInputField = null;
+    }
+
+    // Update the counter and section visibility
+    document.getElementById('wild-count-num').textContent = rd.wild.length;
+    document.getElementById('wild-section-header').classList.toggle('hidden', rd.wild.length === 0);
+    
+    updateAllDisplays();
+    saveGame();
 }
 
 function renderDiceRow(dice, roundData) {
