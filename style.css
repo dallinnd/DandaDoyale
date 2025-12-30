@@ -49,20 +49,40 @@ body {
     align-items: center;
 }
 
-/* Wild Dice Cards */
-.wild-stack { display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px; }
-.wild-card {
+/* ... Previous Styles ... */
+
+/* Top Wild Counter Styling */
+.wild-counter-top {
     background-color: white;
     color: #000;
     border-radius: 20px;
     padding: 16px;
-    border: 3px solid transparent;
-    transition: all 0.2s ease;
+    margin-bottom: 20px;
     display: flex;
-    flex-direction: column;
-    gap: 12px;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
 }
-.wild-card.active-input { background-color: #000 !important; color: #fff !important; border-color: #16a34a; }
+
+.counter-btn {
+    width: 44px;
+    height: 44px;
+    background-color: #f3f4f6;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: 900;
+    transition: active 0.1s;
+}
+
+.counter-btn:active { background-color: #e5e7eb; transform: scale(0.9); }
+
+/* Grid for Wild Cards at bottom */
+.wild-stack { display: flex; flex-direction: column; gap: 12px; margin-top: 12px; }
+
+/* ... Rest of existing styles (wild-card, active-input, etc.) ... */
 
 .color-picker-wheel { display: flex; justify-content: center; gap: 8px; padding-top: 10px; border-top: 1px solid rgba(0,0,0,0.05); }
 .wheel-item { flex: 0 0 auto; width: 26px; height: 26px; border-radius: 50%; border: 2px solid #ddd; }
