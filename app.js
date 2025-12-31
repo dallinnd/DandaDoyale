@@ -117,7 +117,7 @@ function renderGame() {
     let sageSectionHtml = '';
     if (roundNum >= 2) {
         if (sageGlobalStatus) {
-            sageSectionHtml = `<div class="mb-6 p-6 bg-yellow-500/10 border-2 border-yellow-500/30 rounded-3xl flex items-center justify-center animate-fadeIn"><span class="text-yellow-600 font-black tracking-tighter text-xl italic underline decoration-yellow-300">★ SAGE QUEST COMPLETE ★</span></div>`;
+            sageSectionHtml = `<div class="mb-6 p-6 bg-yellow-500/10 border-2 border-yellow-500/30 rounded-3xl flex items-center justify-center animate-fadeIn"><span class="text-yellow-600 font-black tracking-tighter text-xl italic decoration-yellow-300">★ SAGE QUEST COMPLETE ★</span></div>`;
         } else {
             sageSectionHtml = `<div id="sage-container" class="mb-6 p-4 bg-black/5 rounded-3xl border border-[var(--border-ui)] animate-fadeIn"><div class="flex justify-between items-end mb-2"><span class="text-[10px] font-black uppercase tracking-widest opacity-60">Sage Progress</span><span id="sage-status-text" class="text-xs font-black uppercase text-green-500">0/6 Used</span></div><div class="h-4 w-full bg-black/10 rounded-full overflow-hidden"><div id="sage-progress-fill" class="h-full bg-gradient-to-r from-green-500 to-emerald-400 transition-all duration-500" style="width: 0%"></div></div></div>`;
         }
