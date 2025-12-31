@@ -73,6 +73,32 @@ function openGameActions(index) {
     document.body.appendChild(overlay);
 }
 
+// --- SAGE CELEBRATION POPUP ---
+function showSagePopup() {
+    const overlay = document.createElement('div');
+    // Intensive backdrop blur for achievement feel
+    overlay.className = 'fixed inset-0 bg-black/40 backdrop-blur-2xl z-[2000] flex items-center justify-center animate-fadeIn cursor-pointer';
+    overlay.onclick = () => overlay.remove();
+
+    overlay.innerHTML = `
+        <div class="w-[85%] max-w-[320px] bg-white border-4 border-yellow-500 rounded-[40px] p-8 text-center shadow-[0_0_50px_rgba(234,179,8,0.3)]">
+            <div class="flex flex-col items-center gap-6">
+                <div class="w-24 h-24 bg-gradient-to-tr from-amber-400 to-yellow-600 rounded-full flex items-center justify-center text-white shadow-xl ring-4 ring-yellow-200">
+                    <svg class="w-14 h-14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="text-3xl font-black text-yellow-600 tracking-tighter mb-1">✨ SAGE QUEST ✨</h2>
+                    <h3 class="text-xl font-black uppercase text-slate-400">COMPLETE</h3>
+                </div>
+                <p class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-300">Tap anywhere to continue</p>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(overlay);
+}
+
 function confirmDelete(index) {
     if(confirm("Permanently delete this game?")) {
         games.splice(index, 1);
@@ -159,6 +185,18 @@ function renderGame() {
         `).join('');
     }
 
+    const sageBarHtml = roundNum >= 2 ? `
+        <div id="sage-container" class="mb-6 p-4 bg-black/5 rounded-3xl border border-[var(--border-ui)] animate-fadeIn">
+            <div class="flex justify-between items-end mb-2">
+                <span class="text-[10px] font-black uppercase tracking-widest opacity-60">Sage Progress</span>
+                <span id="sage-status-text" class="text-xs font-black uppercase text-green-500">0/6 Used</span>
+            </div>
+            <div class="h-4 w-full bg-black/10 rounded-full overflow-hidden">
+                <div id="sage-progress-fill" class="h-full bg-gradient-to-r from-green-500 to-emerald-400 transition-all duration-500" style="width: 0%"></div>
+            </div>
+        </div>
+    ` : '';
+
     app.innerHTML = `
         <div class="scroll-area" id="game-scroll">
             <div class="sticky top-0 bg-inherit backdrop-blur-md z-50 p-5 border-b border-[var(--border-ui)] flex justify-between items-center">
@@ -174,6 +212,8 @@ function renderGame() {
             <div class="p-4 pb-8">
                 ${prevRoundInfoHtml}
                 
+                ${sageBarHtml}
+
                 <div class="section-title animate-fadeIn" style="animation-delay: 0.1s">
                     <h3>Dice Calculators</h3>
                 </div>
@@ -244,6 +284,20 @@ function renderWildCardHtml(w, idx) {
 }
 
 // --- Logic & State Management ---
+
+function calculateSageProgress(round) {
+    const usedColors = new Set();
+    diceConfig.forEach(d => {
+        if (round[d.id] && round[d.id].length > 0) usedColors.add(d.id);
+    });
+    if (round.wild) {
+        round.wild.forEach(w => { if (w.value !== 0) usedColors.add(w.target); });
+    }
+    const count = usedColors.size;
+    const percentage = Math.min(100, (count / 6) * 100);
+    return { count, percentage };
+}
+
 function adjustWildCount(delta) {
     const rd = activeGame.rounds[activeGame.currentRound];
     if (!rd.wild) rd.wild = [];
@@ -265,7 +319,6 @@ function adjustWildCount(delta) {
     updateAllDisplays(); saveGame();
 }
 
-// FIXED: Now manually updates the DOM for immediate visual feedback
 function setWildTarget(idx, targetId) {
     const roundData = activeGame.rounds[activeGame.currentRound];
     roundData.wild[idx].target = targetId;
@@ -274,10 +327,7 @@ function setWildTarget(idx, targetId) {
     const card = document.getElementById(`wild-card-${idx}`);
     
     if (card) {
-        // Update the card border color
         card.style.borderLeftColor = config.color;
-        
-        // Update the color wheel selections
         const wheelItems = card.querySelectorAll('.wheel-item');
         const selectableColors = diceConfig.filter(d => d.id !== 'yellow');
         
@@ -288,7 +338,7 @@ function setWildTarget(idx, targetId) {
         });
     }
 
-    setActiveWildInput(idx); // UX: Automatically select this die
+    setActiveWildInput(idx);
     updateAllDisplays(); 
     saveGame();
 }
@@ -332,6 +382,27 @@ function setActiveInput(id) {
 function updateAllDisplays() {
     const round = activeGame.rounds[activeGame.currentRound];
     if (!round) return;
+    
+    // --- SAGE PROGRESS UI WITH GOLD COLOR ---
+    const sage = calculateSageProgress(round);
+    const sageText = document.getElementById('sage-status-text');
+    const sageFill = document.getElementById('sage-progress-fill');
+    
+    if (sageText) {
+        sageText.textContent = `${sage.count}/6 Used${sage.count >= 6 ? ' - SAGE! ✨' : ''}`;
+        sageText.classList.toggle('text-yellow-500', sage.count >= 6);
+        sageText.classList.toggle('text-green-500', sage.count < 6);
+    }
+    
+    if (sageFill) {
+        sageFill.style.width = `${sage.percentage}%`;
+        if (sage.count >= 6) {
+            sageFill.className = "h-full bg-gradient-to-r from-amber-300 via-yellow-500 to-amber-600 transition-all duration-500";
+        } else {
+            sageFill.className = "h-full bg-gradient-to-r from-green-500 to-emerald-400 transition-all duration-500";
+        }
+    }
+
     const wildBonuses = {};
     (round.wild || []).forEach((w, i) => {
         wildBonuses[w.target] = (wildBonuses[w.target] || 0) + (w.value || 0);
@@ -401,10 +472,20 @@ function kpEnter() {
 }
 
 // --- Global Utilities ---
+
 function changeRound(s) { 
+    const currentRoundData = activeGame.rounds[activeGame.currentRound];
+    const sage = calculateSageProgress(currentRoundData);
+    
+    // Sage Celebration trigger
+    if (s === 1 && sage.count >= 6) {
+        showSagePopup();
+    }
+    
     const n = activeGame.currentRound + s; 
     if (n >= 0 && n < 10) { activeGame.currentRound = n; renderGame(); } 
 }
+
 function removeVal(id, idx) { 
     activeGame.rounds[activeGame.currentRound][id].splice(idx, 1); 
     updateAllDisplays(); saveGame(); 
