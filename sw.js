@@ -1,36 +1,46 @@
-const CACHE_NAME = 'panda-royale-normNexpan-v4';
-const ASSETS = [
+const CACHE_NAME = 'panda-royale-v1';
+const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './style.css',
   './app.js',
   './manifest.json',
-  'https://cdn.tailwindcss.com'
+  './icon-192.png',
+  './icon-512.png'
 ];
 
-// Install Service Worker
+// Install Event: Cache all core files
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS);
+      return cache.addAll(ASSETS_TO_CACHE);
     })
   );
+  // Force the waiting service worker to become the active service worker
+  self.skipWaiting();
 });
 
-// Activate & Clean up old caches
+// Activate Event: Clean up old caches
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((keys) => {
-      return Promise.all(keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key)));
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames.map((cache) => {
+          if (cache !== CACHE_NAME) {
+            return caches.delete(cache);
+          }
+        })
+      );
     })
   );
 });
 
-// Fetch from cache first, then network
+// Fetch Event: Required for Chrome's "Add to Home Screen"
 self.addEventListener('fetch', (event) => {
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      return cachedResponse || fetch(event.request);
+    caches.match(event.request).then((response) => {
+      // Return cached file OR fetch from network
+      return response || fetch(event.request);
     })
   );
 });
