@@ -502,7 +502,7 @@ function toggleMenu() {
             <div class="mt-8 pt-8 border-t border-black/5 space-y-2">
                 <button onclick="showOnboarding(1)" ...>Replay Instructions</button>
                 
-                <a href="https://yourdomain.com/privacy.html" target="_blank" class="w-full text-left p-4 bg-slate-100 text-slate-600 rounded-2xl font-bold block no-underline">Privacy Policy</a>
+                <a href="https://dallinnd.github.io/DandaDoyale/privacy.html" target="_blank" class="w-full text-left p-4 bg-slate-100 text-slate-600 rounded-2xl font-bold block no-underline">Privacy Policy</a>
                 
                 <button onclick="clearHistory()" ...>Clear All History</button>
             </div>
