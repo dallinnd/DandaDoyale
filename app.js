@@ -26,8 +26,8 @@ function applySettings() {
 // --- Navigation & Initialization ---
 function showSplash() {
     app.innerHTML = `<div class="h-full flex flex-col items-center justify-center bg-[#0f172a]" onclick="showHome()">
-        <h1 class="text-6xl font-black text-green-400">PANDA</h1>
-        <h2 class="text-2xl font-bold text-slate-500 tracking-[0.3em] uppercase">Royale</h2>
+        <h1 class="text-5xl font-black text-green-400 text-center px-6">PANDA ROYALE</h1>
+        <h2 class="text-xl font-bold text-slate-500 tracking-[0.3em] uppercase mt-2">Calculator</h2>
         <p class="mt-12 text-slate-600 animate-pulse font-bold text-xs uppercase">Tap to Enter</p>
     </div>`;
 }
@@ -186,36 +186,39 @@ function renderGame() {
         ? `<button onclick="showResults()" class="px-4 py-2 bg-green-600 text-white text-[10px] font-black uppercase rounded-lg shadow-lg">Results</button>`
         : `<button onclick="changeRound(1)" class="nav-btn">${rightChevron}</button>`;
 
-    let prevRoundHtml = '';
+    // --- Review Section (Top) ---
+    let reviewSectionHtml = '';
     if (activeGame.currentRound > 0) {
         const pr = activeGame.rounds[activeGame.currentRound - 1];
-        prevRoundHtml = `
+        reviewSectionHtml += `
             <div class="animate-fadeIn">
                 <div class="prev-round-box"><span>Prev Round Yellow Total</span><span class="text-xl">${(pr.yellow || []).reduce((a,b)=>a+b,0)}</span></div>
                 <div class="prev-total-box"><span>Last Round Total Score</span><span class="text-xl">${calculateRoundTotal(pr)}</span></div>
             </div>`;
     }
 
-    let sageSectionHtml = '';
-    if (isExpansion && roundNum >= 2) {
-        if (sageGlobalStatus) {
-            sageSectionHtml = `
-                <div class="prev-round-box bg-yellow-500 text-black border-none mb-3 py-3 animate-fadeIn flex justify-between items-center shadow-md">
-                    <span class="text-[10px] font-black uppercase tracking-widest">Sage Quest</span>
-                    <span class="text-xs font-black tracking-tighter italic decoration-black underline"> COMPLETE ✓ </span>
-                </div>`;
-        } else {
-            sageSectionHtml = `
-                <div id="sage-container" class="mb-6 p-4 bg-black/5 rounded-3xl border border-[var(--border-ui)] animate-fadeIn">
-                    <div class="flex justify-between items-end mb-2">
-                        <span class="text-[10px] font-black uppercase tracking-widest opacity-60">Sage Progress</span>
-                        <span id="sage-status-text" class="text-xs font-black uppercase">0/6 Used</span>
-                    </div>
-                    <div class="h-4 w-full bg-black/10 rounded-full overflow-hidden">
-                        <div id="sage-progress-fill" class="h-full transition-all duration-500" style="width: 0%"></div>
-                    </div>
-                </div>`;
-        }
+    // Gold Box Badge (Moved to Review Section if quest is complete)
+    if (isExpansion && roundNum >= 2 && sageGlobalStatus) {
+        reviewSectionHtml += `
+            <div class="prev-round-box bg-yellow-500 text-black border-none mb-3 py-3 animate-fadeIn flex justify-between items-center shadow-md">
+                <span class="text-[10px] font-black uppercase tracking-widest">Sage Quest</span>
+                <span class="text-xs font-black tracking-tighter italic decoration-black underline"> COMPLETE ✓ </span>
+            </div>`;
+    }
+
+    // --- Progress Section (Below Dice) ---
+    let progressSectionHtml = '';
+    if (isExpansion && roundNum >= 2 && !sageGlobalStatus) {
+        progressSectionHtml = `
+            <div id="sage-container" class="mt-8 mb-4 p-4 bg-black/5 rounded-3xl border border-[var(--border-ui)] animate-fadeIn">
+                <div class="flex justify-between items-end mb-2">
+                    <span class="text-[10px] font-black uppercase tracking-widest opacity-60">Sage Progress</span>
+                    <span id="sage-status-text" class="text-xs font-black uppercase">0/6 Used</span>
+                </div>
+                <div class="h-4 w-full bg-black/10 rounded-full overflow-hidden">
+                    <div id="sage-progress-fill" class="h-full transition-all duration-500" style="width: 0%"></div>
+                </div>
+            </div>`;
     }
 
     let diceRowsHtml = (roundNum === 1) 
@@ -232,10 +235,11 @@ function renderGame() {
             <div class="flex items-center gap-6"><button onclick="changeRound(-1)" class="nav-btn ${roundNum === 1 ? 'disabled' : ''}">${leftChevron}</button><div class="text-center"><div class="text-xl font-black uppercase">Round ${roundNum}</div><div id="round-total-display" class="text-5xl font-black">0</div></div>${rightAction}</div><div class="w-10"></div>
         </div>
         <div class="p-4 pb-8">
-            ${prevRoundHtml}
-            ${sageSectionHtml}
+            ${reviewSectionHtml}
             <div class="section-title animate-fadeIn"><h3>Dice Calculators</h3></div>
-            <div class="space-y-3">${diceRowsHtml}
+            <div class="space-y-3">
+                ${diceRowsHtml}
+                ${progressSectionHtml}
                 <div id="wild-section" class="wild-section-container animate-fadeIn ${(!isExpansion || roundNum < 2) ? 'hidden' : ''}">
                     <div class="wild-counter-inline shadow-sm"><span class="text-[10px] font-black uppercase opacity-60">Wild Dice Qty</span><div class="flex items-center gap-5"><button onclick="adjustWildCount(-1)" class="wild-btn-minus">-</button><span id="wild-count-num" class="font-black text-2xl">${(roundData.wild || []).length}</span><button onclick="adjustWildCount(1)" class="wild-btn-plus">+</button></div></div>
                     <div class="wild-stack" id="wild-list-container">${(roundData.wild || []).map((w, idx) => renderWildCardHtml(w, idx)).join('')}</div>
@@ -244,6 +248,12 @@ function renderGame() {
         </div>
     </div>
     <div id="keypad-container" class="keypad-area p-4 flex flex-col"><div id="active-input-display" class="text-center text-lg font-black mb-3 h-6 tracking-widest uppercase opacity-60">-</div><div class="grid grid-cols-4 gap-2 flex-1">${[1,2,3].map(n => `<button onclick="kpInput('${n}')" class="kp-btn bg-black/5 text-inherit text-3xl">${n}</button>`).join('')}<button id="add-btn" onclick="kpEnter()" class="kp-btn bg-green-600 text-white row-span-4 h-full">ADD</button>${[4,5,6].map(n => `<button onclick="kpInput('${n}')" class="kp-btn bg-black/5 text-inherit text-3xl">${n}</button>`).join('')}${[7,8,9].map(n => `<button onclick="kpInput('${n}')" class="kp-btn bg-black/5 text-inherit text-3xl">${n}</button>`).join('')}<button onclick="kpClear()" class="kp-btn bg-black/5 text-lg font-bold text-slate-400">CLR</button><button onclick="kpInput('0')" class="kp-btn bg-black/5 text-inherit text-3xl">0</button><button onclick="kpToggleNeg()" class="kp-btn bg-black/5 text-inherit text-2xl">+/-</button></div></div>`;
+    
+    // Auto-select Yellow in Round 1
+    if (roundNum === 1 && !activeInputField) {
+        setActiveInput('yellow');
+    }
+
     updateAllDisplays();
 }
 
@@ -284,7 +294,7 @@ function updateAllDisplays() {
     document.getElementById('grand-total-box').textContent = calculateGrandTotal(activeGame);
 }
 
-// --- Smooth Interactions ---
+// --- Interaction Logic ---
 function updateKeypadTheme(bgColor, textColor) {
     const keys = document.querySelectorAll('.kp-btn:not(#add-btn)');
     keys.forEach(k => {
@@ -294,19 +304,16 @@ function updateKeypadTheme(bgColor, textColor) {
     });
 }
 
-// FIX: Combined Round Change Logic to prevent blocking
 function changeRound(s) { 
     const n = activeGame.currentRound + s; 
     if (n < 0 || n >= 10) return;
 
-    // Trigger Popup BEFORE logic update
     if (activeGame.mode === 'expansion' && s === 1) {
         const sageNow = calculateSageProgress(activeGame.rounds[activeGame.currentRound]).count >= 6;
         const completedPreviously = activeGame.rounds.slice(0, activeGame.currentRound).some(r => calculateSageProgress(r).count >= 6);
         if (sageNow && !completedPreviously) showSagePopup();
     }
     
-    // Update State and Render
     activeGame.currentRound = n; 
     saveGame(); 
     renderGame(); 
@@ -316,8 +323,15 @@ function adjustWildCount(delta) {
     const rd = activeGame.rounds[activeGame.currentRound];
     if (!rd.wild) rd.wild = [];
     if (rd.wild.length + delta < 0 || rd.wild.length + delta > 9) return;
-    if (delta > 0) rd.wild.push({ value: 0, target: 'purple' });
-    else { rd.wild.pop(); if (activeInputField && activeInputField.startsWith('wild-')) activeInputField = null; }
+    
+    if (delta > 0) {
+        rd.wild.push({ value: 0, target: 'purple' });
+        setActiveWildInput(0); 
+    } else {
+        rd.wild.pop();
+        if (activeInputField && activeInputField.startsWith('wild-')) activeInputField = null;
+    }
+    
     saveGame();
     const container = document.getElementById('wild-list-container');
     const countNum = document.getElementById('wild-count-num');
@@ -329,6 +343,7 @@ function adjustWildCount(delta) {
 function toggleSparkle() {
     const rd = activeGame.rounds[activeGame.currentRound];
     rd.blueHasSparkle = !rd.blueHasSparkle;
+    setActiveInput('blue');
     const btn = document.getElementById('sparkle-btn');
     if (btn) {
         btn.innerHTML = rd.blueHasSparkle ? 'Sparkle Activated ✨' : 'Add Sparkle?';
@@ -408,7 +423,12 @@ function kpEnter() {
     else rd[activeInputField].push(parseFloat(keypadValue));
     kpClear(); updateAllDisplays(); saveGame();
 }
-function removeVal(id, idx) { activeGame.rounds[activeGame.currentRound][id].splice(idx, 1); updateAllDisplays(); saveGame(); }
+function removeVal(id, idx) { 
+    activeGame.rounds[activeGame.currentRound][id].splice(idx, 1); 
+    setActiveInput(id);
+    updateAllDisplays(); 
+    saveGame(); 
+}
 function saveGame() { localStorage.setItem('panda_games', JSON.stringify(games)); }
 function setTheme(t) { settings.theme = t; applySettings(); toggleMenu(); showHome(); }
 function toggleMenu() {
