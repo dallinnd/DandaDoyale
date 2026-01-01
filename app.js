@@ -487,26 +487,53 @@ function removeVal(id, idx) { activeGame.rounds[activeGame.currentRound][id].spl
 function saveGame() { localStorage.setItem('panda_games', JSON.stringify(games)); }
 function setTheme(t) { settings.theme = t; applySettings(); toggleMenu(); showHome(); }
 function toggleMenu() {
-    const ex = document.getElementById('menu-overlay');
-    if (ex) { ex.remove(); return; }
+    // 1. Check if the menu is already open; if so, remove it (Toggle behavior)
+    const existingMenu = document.getElementById('menu-overlay');
+    if (existingMenu) {
+        existingMenu.remove();
+        return;
+    }
+
+    // 2. Create the overlay container
     const menu = document.createElement('div');
     menu.id = 'menu-overlay';
-    // ... existing menu setup ...
+    // Use fixed positioning and high z-index to ensure it sits on top
+    menu.className = 'fixed inset-0 z-[4000] bg-black/40 backdrop-blur-md flex justify-end animate-fadeIn';
+    
+    // 3. Close menu if user clicks the dark backdrop
+    menu.onclick = (e) => {
+        if (e.target === menu) menu.remove();
+    };
+
+    // 4. Set the inner HTML with the correct styling and your new Privacy Policy link
     menu.innerHTML = `
-        <div class="menu-panel flex flex-col">
-            <h2 class="text-xl font-black uppercase mb-8">Settings</h2>
-            <div class="space-y-3">
-                <button onclick="setTheme('dark')" ...>Dark Navy</button>
-                <button onclick="setTheme('light')" ...>Off-White</button>
+        <div class="menu-panel w-72 h-full bg-[var(--bg-main)] border-l border-[var(--border-ui)] p-8 flex flex-col shadow-2xl" onclick="event.stopPropagation()">
+            <h2 class="text-xl font-black uppercase mb-8 tracking-tight">Settings</h2>
+            
+            <div class="space-y-4">
+                <button onclick="setTheme('dark')" class="w-full text-left p-4 rounded-2xl border-2 transition-all ${settings.theme === 'dark' ? 'border-green-600 bg-green-600/10' : 'border-black/5'}">
+                    <span class="font-bold text-sm">Dark Navy</span>
+                </button>
+                <button onclick="setTheme('light')" class="w-full text-left p-4 rounded-2xl border-2 transition-all ${settings.theme === 'light' ? 'border-blue-600 bg-blue-600/10' : 'border-black/5'}">
+                    <span class="font-bold text-sm">Off-White</span>
+                </button>
             </div>
-            <div class="mt-8 pt-8 border-t border-black/5 space-y-2">
-                <button onclick="showOnboarding(1)" ...>Replay Instructions</button>
+
+            <div class="mt-auto space-y-3">
+                <button onclick="showOnboarding(1)" class="w-full p-4 bg-blue-600/10 text-blue-500 rounded-2xl font-black text-xs uppercase tracking-widest">
+                    Replay Instructions
+                </button>
                 
-                <a href="https://dallinnd.github.io/DandaDoyale/privacy.html" target="_blank" class="w-full text-left p-4 bg-slate-100 text-slate-600 rounded-2xl font-bold block no-underline">Privacy Policy</a>
-                
-                <button onclick="clearHistory()" ...>Clear All History</button>
+                <a href="https://yourdomain.com/privacy.html" target="_blank" class="w-full p-4 bg-black/5 text-slate-500 rounded-2xl font-black text-xs uppercase tracking-widest block text-center no-underline">
+                    Privacy Policy
+                </a>
+
+                <button onclick="clearHistory()" class="w-full p-4 text-red-500 font-bold text-xs italic opacity-60 hover:opacity-100 transition-opacity">
+                    Clear All History
+                </button>
             </div>
         </div>`;
+
     document.body.appendChild(menu);
 }
 function clearHistory() { if (confirm("Delete ALL history?")) { games = []; saveGame(); showHome(); } }
