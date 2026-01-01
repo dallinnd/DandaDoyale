@@ -491,18 +491,20 @@ function toggleMenu() {
     if (ex) { ex.remove(); return; }
     const menu = document.createElement('div');
     menu.id = 'menu-overlay';
-    menu.className = 'modal-overlay justify-end animate-fadeIn';
-    menu.onclick = (e) => { if(e.target === menu) menu.remove(); };
+    // ... existing menu setup ...
     menu.innerHTML = `
         <div class="menu-panel flex flex-col">
             <h2 class="text-xl font-black uppercase mb-8">Settings</h2>
             <div class="space-y-3">
-                <button onclick="setTheme('dark')" class="w-full text-left p-4 rounded-2xl border-2 ${settings.theme === 'dark' ? 'border-green-600 bg-green-600/10' : 'border-black/5'}">Dark Navy</button>
-                <button onclick="setTheme('light')" class="w-full text-left p-4 rounded-2xl border-2 ${settings.theme === 'light' ? 'border-blue-600 bg-blue-600/10' : 'border-black/5'}">Off-White</button>
+                <button onclick="setTheme('dark')" ...>Dark Navy</button>
+                <button onclick="setTheme('light')" ...>Off-White</button>
             </div>
             <div class="mt-8 pt-8 border-t border-black/5 space-y-2">
-                <button onclick="showOnboarding(1)" class="w-full text-left p-4 bg-blue-500/10 text-blue-500 rounded-2xl font-bold">Replay Instructions</button>
-                <button onclick="clearHistory()" class="w-full text-left p-4 text-red-600 font-bold opacity-50 italic">Clear All History</button>
+                <button onclick="showOnboarding(1)" ...>Replay Instructions</button>
+                
+                <a href="https://yourdomain.com/privacy.html" target="_blank" class="w-full text-left p-4 bg-slate-100 text-slate-600 rounded-2xl font-bold block no-underline">Privacy Policy</a>
+                
+                <button onclick="clearHistory()" ...>Clear All History</button>
             </div>
         </div>`;
     document.body.appendChild(menu);
