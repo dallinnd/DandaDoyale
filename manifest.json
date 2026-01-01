@@ -1,6 +1,6 @@
 {
-  "short_name": "PandaScore",
-  "name": "Panda Royale Score Card",
+  "short_name": "Panda Royale",
+  "name": "Panda Royale Calculator",
   "description": "Professional score tracking for Panda Royale with Wild Dice logic.",
   "icons": [
     {
