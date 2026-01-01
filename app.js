@@ -109,57 +109,6 @@ function finishOnboarding() {
     showHome();
 }
 
-function renderOnboardingCard(step) {
-    const existing = document.getElementById('onboarding-overlay');
-    if (existing) existing.remove();
-
-    const overlay = document.createElement('div');
-    overlay.id = 'onboarding-overlay';
-    overlay.className = 'fixed inset-0 z-[3000] bg-[#0f172a] flex flex-col p-8 slide-in-right text-white';
-
-    let content = '';
-    if (step === 1) {
-        content = `
-            <div class="flex justify-between items-center mb-10">
-                <span class="text-[10px] font-black uppercase tracking-[0.3em] opacity-40">Step 1 of 2</span>
-                <button onclick="showOnboarding(2)" class="bg-blue-600 px-4 py-1.5 rounded-full font-black uppercase text-xs">Next</button>
-            </div>
-            <div class="flex-1 flex flex-col justify-center">
-                <h2 class="text-4xl font-black mb-8 tracking-tighter">Master the Menu</h2>
-                <div class="space-y-6 text-slate-300 font-medium leading-snug">
-                    <p><strong class="text-white">The Menu Icon:</strong> Tap the top-right icon in History to find Themes, Instructions, and "Clear History".</p>
-                    <p><strong class="text-white">Game Modes:</strong> Choose <span class="text-green-400">Normal</span> or <span class="text-purple-400">Expansion</span> when starting a new game.</p>
-                    <p><strong class="text-white">Management:</strong> Tap any saved game to <span class="text-blue-400">Resume</span> playing or <span class="text-red-400">Delete</span> it.</p>
-                </div>
-            </div>
-            <button onclick="finishOnboarding()" class="mt-10 py-4 opacity-40 font-black uppercase text-[10px] tracking-widest">Skip Instructions</button>`;
-    } else {
-        content = `
-            <div class="flex justify-between items-center mb-10">
-                <span class="text-[10px] font-black uppercase tracking-[0.3em] opacity-40">Step 2 of 2</span>
-                <button onclick="finishOnboarding()" class="bg-green-600 px-4 py-1.5 rounded-full font-black uppercase text-xs">Done</button>
-            </div>
-            <div class="flex-1 flex flex-col justify-center">
-                <h2 class="text-4xl font-black mb-8 tracking-tighter">How to Navigate Your Game</h2>
-                <div class="space-y-6 text-slate-300 font-medium leading-snug text-sm">
-                    <p><strong class="text-white">Visual Feedback:</strong> When a dice color is selected, watch the section background and numpad keys change to match!</p>
-                    <p><strong class="text-white">Round Control:</strong> Use the <strong class="text-white">Arrows</strong> at the top to move between Rounds 1-10.</p>
-                    <p><strong class="text-white">Expansion Features:</strong> With sage quests, rerolls, and wild dice, this is a new fun way to add a spin to the already fun Panda Royale Game!</p>
-                </div>
-            </div>
-            <button onclick="finishOnboarding()" class="mt-10 py-4 opacity-40 font-black uppercase text-[10px] tracking-widest text-white">Start Playing</button>`;
-    }
-
-    overlay.innerHTML = content;
-    document.body.appendChild(overlay);
-}
-
-function finishOnboarding() {
-    localStorage.setItem('panda_onboarding_complete', 'true');
-    const o = document.getElementById('onboarding-overlay');
-    if (o) o.remove(); showHome();
-}
-
 function showHome() {
     activeInputField = null; 
     const gameCards = games.map((g, i) => {
